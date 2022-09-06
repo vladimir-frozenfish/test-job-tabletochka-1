@@ -7,7 +7,26 @@ class DrugstoreSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
+            'created_at',
+            'updated_at',
             'drugstore_id',
             'phone'
         )
         model = Drugstore
+
+
+class DrugstoreCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = (
+            'created_at',
+            'updated_at',
+            'drugstore_id',
+            'phone'
+        )
+        model = Drugstore
+
+    def to_representation(self, instance):
+        return {
+            'drugstore_id': instance.drugstore_id
+        }

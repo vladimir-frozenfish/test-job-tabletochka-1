@@ -2,6 +2,12 @@ from django.db import models
 
 
 class Drugstore(models.Model):
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name='Дата изменения'
+    )
     drugstore_id = models.CharField(
         max_length=75, primary_key=True, verbose_name='Идентификатор аптеки'
     )

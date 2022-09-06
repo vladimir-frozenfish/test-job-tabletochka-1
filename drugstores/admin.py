@@ -6,6 +6,8 @@ from .models import Drugstore
 class DrugstoreAdmin(admin.ModelAdmin):
     list_display = (
         'drugstore_id',
+        'created_at',
+        'updated_at',
         'phone'
     )
     list_display_links = ('drugstore_id', )
