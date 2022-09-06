@@ -8,7 +8,8 @@ class DrugstoreAdmin(admin.ModelAdmin):
         'drugstore_id',
         'created_at',
         'updated_at',
-        'phone'
+        'phone',
+        'schedule_representation'
     )
     list_display_links = ('drugstore_id', )
 

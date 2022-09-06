@@ -11,7 +11,7 @@ class DrugstoreViewSet(viewsets.ModelViewSet):
     serializer_class = DrugstoreSerializer
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return DrugstoreSerializer
-        return DrugstoreCreateSerializer
+        if self.request.method == 'POST':
+            return DrugstoreCreateSerializer
+        return DrugstoreSerializer
 

@@ -15,6 +15,9 @@ class Drugstore(models.Model):
         max_length=20, verbose_name='Телефон'
     )
 
+    def schedule_representation(self):
+        return f'{self.phone} - {self.updated_at}'
+
     class Meta:
         verbose_name_plural = 'Аптеки'
         verbose_name = 'Аптека'
@@ -22,3 +25,5 @@ class Drugstore(models.Model):
 
     def __str__(self):
         return self.drugstore_id
+
+

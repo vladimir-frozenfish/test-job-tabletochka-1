@@ -10,7 +10,8 @@ class DrugstoreSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
             'drugstore_id',
-            'phone'
+            'phone',
+            'schedule_representation'
         )
         model = Drugstore
 
@@ -19,8 +20,6 @@ class DrugstoreCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
-            'created_at',
-            'updated_at',
             'drugstore_id',
             'phone'
         )
