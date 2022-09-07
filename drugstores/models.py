@@ -16,7 +16,10 @@ class Drugstore(models.Model):
     )
 
     def schedule_representation(self):
-        return f'{self.phone} - {self.updated_at}'
+        try:
+            return f'Время открытия в понедельник - {self.schedule.monday_open}'
+        except Exception:
+            return 'Расписания нет'
 
     class Meta:
         verbose_name_plural = 'Аптеки'
@@ -32,20 +35,20 @@ class Schedule(models.Model):
         Drugstore, on_delete=models.CASCADE,
         related_name='schedule', verbose_name='Аптека'
     )
-    monday_open = models.CharField(max_length=5, blank=True, verbose_name='Понедельник открытие')
-    monday_close = models.CharField(max_length=5, verbose_name='Понедельник закрытие')
-    tuesday_open = models.CharField(max_length=5, blank=True, verbose_name='Вторник открытие')
-    tuesday_close = models.CharField(max_length=5, verbose_name='Вторник закрытие')
-    wednesday_open = models.CharField(max_length=5, blank=True, verbose_name='Среда открытие')
-    wednesday_close = models.CharField(max_length=5, verbose_name='Среда закрытие')
-    thursday_open = models.CharField(max_length=5, blank=True, verbose_name='Четверг открытие')
-    thursday_close = models.CharField(max_length=5, verbose_name='Четверг закрытие')
-    friday_open = models.CharField(max_length=5, blank=True, verbose_name='Пятница открытие')
-    friday_close = models.CharField(max_length=5, verbose_name='Пятница закрытие')
-    saturday_open = models.CharField(max_length=5, blank=True, verbose_name='Суббота открытие')
-    saturday_close = models.CharField(max_length=5, verbose_name='Суббота закрытие')
-    sunday_open = models.CharField(max_length=5, blank=True, verbose_name='Воскресенье открытие')
-    sunday_close = models.CharField(max_length=5, verbose_name='Воскресенье закрытие')
+    monday_open = models.TimeField(blank=True, null=True, verbose_name='Понедельник открытие')
+    monday_close = models.TimeField(verbose_name='Понедельник закрытие')
+    tuesday_open = models.TimeField(blank=True, null=True, verbose_name='Вторник открытие')
+    tuesday_close = models.TimeField(verbose_name='Вторник закрытие')
+    wednesday_open = models.TimeField(blank=True, null=True, verbose_name='Среда открытие')
+    wednesday_close = models.TimeField(verbose_name='Среда закрытие')
+    thursday_open = models.TimeField(blank=True, null=True, verbose_name='Четверг открытие')
+    thursday_close = models.TimeField(verbose_name='Четверг закрытие')
+    friday_open = models.TimeField(blank=True, null=True, verbose_name='Пятница открытие')
+    friday_close = models.TimeField(verbose_name='Пятница закрытие')
+    saturday_open = models.TimeField(blank=True, null=True, verbose_name='Суббота открытие')
+    saturday_close = models.TimeField(verbose_name='Суббота закрытие')
+    sunday_open = models.TimeField(blank=True, null=True, verbose_name='Воскресенье открытие')
+    sunday_close = models.TimeField(verbose_name='Воскресенье закрытие')
 
     class Meta:
         verbose_name_plural = 'Расписание аптек'
