@@ -27,3 +27,38 @@ class Drugstore(models.Model):
         return self.drugstore_id
 
 
+class Schedule(models.Model):
+    drugstore = models.OneToOneField(
+        Drugstore, on_delete=models.CASCADE,
+        related_name='schedule', verbose_name='Аптека'
+    )
+    monday_open = models.CharField(max_length=5, blank=True, verbose_name='Понедельник открытие')
+    monday_close = models.CharField(max_length=5, verbose_name='Понедельник закрытие')
+    tuesday_open = models.CharField(max_length=5, blank=True, verbose_name='Вторник открытие')
+    tuesday_close = models.CharField(max_length=5, verbose_name='Вторник закрытие')
+    wednesday_open = models.CharField(max_length=5, blank=True, verbose_name='Среда открытие')
+    wednesday_close = models.CharField(max_length=5, verbose_name='Среда закрытие')
+    thursday_open = models.CharField(max_length=5, blank=True, verbose_name='Четверг открытие')
+    thursday_close = models.CharField(max_length=5, verbose_name='Четверг закрытие')
+    friday_open = models.CharField(max_length=5, blank=True, verbose_name='Пятница открытие')
+    friday_close = models.CharField(max_length=5, verbose_name='Пятница закрытие')
+    saturday_open = models.CharField(max_length=5, blank=True, verbose_name='Суббота открытие')
+    saturday_close = models.CharField(max_length=5, verbose_name='Суббота закрытие')
+    sunday_open = models.CharField(max_length=5, blank=True, verbose_name='Воскресенье открытие')
+    sunday_close = models.CharField(max_length=5, verbose_name='Воскресенье закрытие')
+
+    class Meta:
+        verbose_name_plural = 'Расписание аптек'
+        verbose_name = 'Расписание аптеки'
+        ordering = ['drugstore']
+
+    def __str__(self):
+        return self.drugstore.drugstore_id
+
+
+
+
+
+
+
+
