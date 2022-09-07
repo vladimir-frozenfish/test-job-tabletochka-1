@@ -29,4 +29,13 @@ def get_schedule_representation(data):
     ):
         return 'круглосуточно'
 
+    """проверка на одинаковую работу аптеки все дни"""
+    open_set = set(open_list)
+    close_set = set(close_list)
+    if (
+            len(open_set) == 1
+            and len(close_set) == 1
+    ):
+        return f'ежедневно {open_set.pop().strftime("%H:%M")}-{close_set.pop().strftime("%H:%M")}'
+
     return 'Не удалось объединить расписание в одну строку'
