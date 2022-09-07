@@ -13,6 +13,7 @@ class DrugstoreAdmin(admin.ModelAdmin):
         'schedule_representation'
     )
     list_display_links = ('drugstore_id', )
+    readonly_fields = ('schedule_representation', )
 
 
 class ScheduleAdmin(admin.ModelAdmin):

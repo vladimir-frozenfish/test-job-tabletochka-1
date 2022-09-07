@@ -1,5 +1,7 @@
 from django.db import models
 
+from .utils import get_schedule_representation
+
 
 class Drugstore(models.Model):
     created_at = models.DateTimeField(
@@ -17,9 +19,11 @@ class Drugstore(models.Model):
 
     def schedule_representation(self):
         try:
-            return f'Время открытия в понедельник - {self.schedule.monday_open}'
+            return get_schedule_representation(self)
         except Exception:
             return 'Расписания нет'
+
+    schedule_representation.short_description = 'Время работы аптеки'
 
     class Meta:
         verbose_name_plural = 'Аптеки'
