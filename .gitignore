@@ -141,3 +141,4 @@ dmypy.json
 # Local History for Visual Studio Code
 .history/
 /db.sqlite3
+/temp.py
