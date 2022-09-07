@@ -2,11 +2,10 @@ from rest_framework import serializers
 
 from drugstores.models import (Drugstore,
                                Schedule)
-from .utils import format_time
+from .utils import format_time, format_schedule
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
-    time = serializers.TimeField(format='%H:%M')
 
     class Meta:
         fields = (
@@ -26,6 +25,8 @@ class ScheduleSerializer(serializers.ModelSerializer):
             'sunday_open',
             'sunday_close'
         )
+        read_only_fields = ('drugstore',)
+
         model = Schedule
 
     def to_representation(self, instance):
@@ -74,10 +75,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
             },
         ]
 
+    def to_internal_value(self, data):
+        return data
+
 
 class DrugstoreSerializer(serializers.ModelSerializer):
-
-    schedule = ScheduleSerializer()
+    schedule = ScheduleSerializer(required=True)
 
     class Meta:
         fields = (
@@ -90,14 +93,34 @@ class DrugstoreSerializer(serializers.ModelSerializer):
         )
         model = Drugstore
 
+    def update(self, instance, data):
+        """редактирование записи о аптеке"""
+
+        """получение нового расписания, удаление старного раписания"""
+        data_schedule = format_schedule(data.get('schedule'))
+        Schedule.objects.filter(drugstore=instance).delete()
+
+        """сохранение основной информации о аптеке"""
+        instance.drugstore_id = data.get('drugstore_id', instance.drugstore_id)
+        instance.phone = data.get('phone', instance.phone)
+        instance.save()
+
+        """сохранение нового расписания"""
+        drugstore = Drugstore.objects.get(drugstore_id=instance.drugstore_id)
+        Schedule.objects.create(drugstore=drugstore, **data_schedule)
+
+        return instance
+
 
 class DrugstoreCreateSerializer(serializers.ModelSerializer):
     """сериализатор для создания записи об аптеке"""
+    schedule = ScheduleSerializer(required=True)
 
     class Meta:
         fields = (
             'drugstore_id',
-            'phone'
+            'phone',
+            'schedule'
         )
         model = Drugstore
 
@@ -105,3 +128,22 @@ class DrugstoreCreateSerializer(serializers.ModelSerializer):
         return {
             'drugstore_id': instance.drugstore_id
         }
+
+    def create(self, data):
+        try:
+            schedule = data.pop('schedule')
+        except:
+            raise serializers.ValidationError(
+                {'message': 'Необходимо указать время работы аптеки'}
+            )
+
+        """создание записи аптеки, получение правильного формата для раписания,
+        создания записи расписания для вновь созданно аптеки"""
+        data_schedule = format_schedule(schedule)
+        drugstore = Drugstore.objects.create(**data)
+        Schedule.objects.create(drugstore=drugstore, **data_schedule)
+
+        return drugstore
+
+
+
