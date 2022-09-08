@@ -3,9 +3,10 @@ from rest_framework import serializers
 from drugstores.models import (
     Drugstore,
     Region,
-    Schedule
+    Schedule,
+    Geo
 )
-from .utils import format_time, format_schedule
+from .utils import format_time
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
@@ -78,9 +79,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
             },
         ]
 
-    # def to_internal_value(self, data):
-    #     return data
-
 
 class RegionSerializer(serializers.ModelSerializer):
     region_id = serializers.CharField(source='id')
@@ -96,6 +94,7 @@ class RegionSerializer(serializers.ModelSerializer):
 
 class DrugstoreSerializer(serializers.ModelSerializer):
     schedule = ScheduleSerializer(required=False)
+    # geo = serializers.StringRelatedField()
     geo = serializers.SerializerMethodField()
 
     class Meta:
@@ -111,8 +110,21 @@ class DrugstoreSerializer(serializers.ModelSerializer):
         model = Drugstore
 
     def get_geo(self, obj):
-        region = RegionSerializer(obj.region)
-        return region.data
+        try:
+            geo = {
+                'address': obj.geo.address,
+                'city_id': obj.geo.city.id,
+                'city_name': obj.geo.city.name,
+                'region_id': obj.geo.city.region.id,
+                'region_name': obj.geo.city.region.name,
+                'location': {
+                    'lat': obj.geo.location_lat,
+                    'lon': obj.geo.location_lon,
+                }
+            }
+            return geo
+        except:
+            return 'Местоположения аптеки не имеется'
 
     '''
     def update(self, instance, data):
@@ -182,3 +194,11 @@ class DrugstoreCreateSerializer(serializers.ModelSerializer):
 
         return drugstore
     '''
+
+
+class GeoSerializer(serializers.ModelSerializer):
+    """сериализатор для создания записи об месторасположении аптеки"""
+
+    class Meta:
+        fields = ('address', 'location_lat', 'location_lon')
+        model = Geo

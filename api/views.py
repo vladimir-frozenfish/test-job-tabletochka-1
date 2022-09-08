@@ -1,11 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from drugstores.models import Drugstore, Schedule
+from drugstores.models import City, Region, Drugstore, Schedule
 
 from .serializers import (DrugstoreSerializer,
                           DrugstoreCreateSerializer,
-                          ScheduleSerializer)
+                          ScheduleSerializer,
+                          GeoSerializer)
 from .utils import format_schedule
 
 
@@ -18,16 +19,18 @@ class DrugstoreViewSet(viewsets.ModelViewSet):
 
         instance = self.get_object()
 
-        """получение нового расписания, удаление старного раписания"""
+        """получение нового расписания, валидация его, удаление старого раписания"""
         data_schedule = format_schedule(request.data.get('schedule'))
-        Schedule.objects.filter(drugstore=instance).delete()
+        schedule_serializer = ScheduleSerializer(data=data_schedule)
+        schedule_serializer.is_valid(raise_exception=True)
 
         """сохранение основной информации о аптеке"""
         instance.drugstore_id = request.data.get('drugstore_id', instance.drugstore_id)
         instance.phone = request.data.get('phone', instance.phone)
         instance.save()
 
-        """сохранение нового расписания"""
+        """удаление старого расписания и сохранение нового расписания"""
+        Schedule.objects.filter(drugstore=instance).delete()
         drugstore = Drugstore.objects.get(drugstore_id=instance.drugstore_id)
         Schedule.objects.create(drugstore=drugstore, **data_schedule)
 
@@ -47,18 +50,37 @@ class DrugstoreViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        """получение данных о месторасположении аптеки"""
+        if 'geo' in request.data:
+            geo = request.data.pop('geo')
+        else:
+            return Response(
+                {'message': 'Необходимо указать месторасположение аптеки'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        """geo, получение или создание нового города и соответственно региона"""
+        region, create_region = Region.objects.get_or_create(id=geo['region_id'], name=geo['region_name'])
+        city, create_city = City.objects.get_or_create(id=geo['city_id'], name=geo['city_name'], region=region)
+        geo['location_lat'] = geo['location']['lat']
+        geo['location_lon'] = geo['location']['lon']
+        geo_serializer = GeoSerializer(data=geo)
+        geo_serializer.is_valid(raise_exception=True)
+
         """преобразование данных о расписание для модели и сериализатора,
         валидация данных о расписании"""
         data_schedule = format_schedule(schedule)
         schedule_serializer = ScheduleSerializer(data=data_schedule)
         schedule_serializer.is_valid(raise_exception=True)
 
-        """валилация основных данных аптеки, сохранение записи аптеки,
-        сохранение записи о расписании аптеки"""
+        """валидация основных данных аптеки, сохранение записи аптеки,
+        сохранение записи о расписании аптеки, сохранение записи о 
+        местоположении аптеки"""
         drugstore_serializer = DrugstoreCreateSerializer(data=request.data)
         drugstore_serializer.is_valid(raise_exception=True)
         drugstore = drugstore_serializer.save()
-        Schedule.objects.create(drugstore=drugstore, **data_schedule)
+        schedule_serializer.save(drugstore=drugstore)
+        geo_serializer.save(city=city, drugstore=drugstore)
 
         return Response(
             {'drugstore_id': drugstore_serializer.data['drugstore_id']},

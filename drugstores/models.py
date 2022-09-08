@@ -19,6 +19,25 @@ class Region(models.Model):
         return self.name
 
 
+class City(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    region = models.ForeignKey(
+        Region, on_delete=models.CASCADE,
+        related_name='cities', verbose_name='Регион города'
+    )
+    name = models.CharField(
+        max_length=100, verbose_name='Город'
+    )
+
+    class Meta:
+        verbose_name_plural = 'Города'
+        verbose_name = 'Город'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Drugstore(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата создания'
@@ -32,11 +51,13 @@ class Drugstore(models.Model):
     phone = models.CharField(
         max_length=20, verbose_name='Телефон'
     )
+    '''
     region = models.ForeignKey(
         Region, on_delete=models.CASCADE,
         related_name='drugstore', verbose_name='Регион аптеки',
         blank=True, null=True
     )
+    '''
 
     def schedule_representation(self):
         try:
@@ -82,6 +103,32 @@ class Schedule(models.Model):
 
     def __str__(self):
         return self.drugstore.drugstore_id
+
+
+class Geo(models.Model):
+    drugstore = models.OneToOneField(
+        Drugstore, on_delete=models.CASCADE,
+        related_name='geo', verbose_name='Аптека'
+    )
+    address = models.CharField(max_length=200, verbose_name='Адрес аптеки')
+    city = models.ForeignKey(
+        City, on_delete=models.CASCADE,
+        related_name='drugstores', verbose_name='Город аптеки'
+    )
+    location_lat = models.DecimalField(
+        max_digits=8, decimal_places=6, verbose_name='Широта'
+    )
+    location_lon = models.DecimalField(
+        max_digits=8, decimal_places=6, verbose_name='Долгота'
+    )
+
+    class Meta:
+        verbose_name_plural = 'Местоположения аптек'
+        verbose_name = 'Местоположение аптеки'
+        ordering = ['drugstore']
+
+    def __str__(self):
+        return f'{self.city.region}, {self.city}, {self.address}'
 
 
 

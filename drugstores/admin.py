@@ -1,7 +1,9 @@
 from django.contrib import admin
 
 from .models import (
+    City,
     Drugstore,
+    Geo,
     Region,
     Schedule
 )
@@ -10,7 +12,8 @@ from .models import (
 class DrugstoreAdmin(admin.ModelAdmin):
     list_display = (
         'drugstore_id',
-        'region',
+        'geo',
+        # 'region',
         'created_at',
         'updated_at',
         'phone',
@@ -48,9 +51,30 @@ class RegionAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'name')
 
 
+class CityAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'region'
+    )
+    list_display_links = ('id', 'name')
+
+
+class GeoAdmin(admin.ModelAdmin):
+    list_display = (
+        'drugstore',
+        'address',
+        'city',
+        'location_lat',
+        'location_lon'
+    )
+
+
 admin.site.register(Drugstore, DrugstoreAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
 admin.site.register(Region, RegionAdmin)
+admin.site.register(City, CityAdmin)
+admin.site.register(Geo, GeoAdmin)
 
 
 
