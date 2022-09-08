@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from drugstores.models import City, Region, Drugstore, Schedule
+from drugstores.models import City, Geo, Region, Drugstore, Schedule
 
 from .serializers import (DrugstoreSerializer,
                           DrugstoreCreateSerializer,
@@ -19,10 +19,25 @@ class DrugstoreViewSet(viewsets.ModelViewSet):
 
         instance = self.get_object()
 
-        """получение нового расписания, валидация его, удаление старого раписания"""
+        """получение нового расписания, валидация его"""
         data_schedule = format_schedule(request.data.get('schedule'))
         schedule_serializer = ScheduleSerializer(data=data_schedule)
         schedule_serializer.is_valid(raise_exception=True)
+
+        """geo, получение или создание нового города и соответственно региона"""
+        geo = request.data.get('geo')
+        if geo is None:
+            return Response(
+                {'message': 'Необходимо указать местоположение аптеки'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        region, create_region = Region.objects.get_or_create(id=geo['region_id'], name=geo['region_name'])
+        city, create_city = City.objects.get_or_create(id=geo['city_id'], name=geo['city_name'], region=region)
+        geo['location_lat'] = geo['location']['lat']
+        geo['location_lon'] = geo['location']['lon']
+        geo_serializer = GeoSerializer(data=geo)
+        geo_serializer.is_valid(raise_exception=True)
 
         """сохранение основной информации о аптеке"""
         instance.drugstore_id = request.data.get('drugstore_id', instance.drugstore_id)
@@ -32,7 +47,11 @@ class DrugstoreViewSet(viewsets.ModelViewSet):
         """удаление старого расписания и сохранение нового расписания"""
         Schedule.objects.filter(drugstore=instance).delete()
         drugstore = Drugstore.objects.get(drugstore_id=instance.drugstore_id)
-        Schedule.objects.create(drugstore=drugstore, **data_schedule)
+        schedule_serializer.save(drugstore=drugstore)
+
+        """удаление старого местоположения и сохранение нового местоположения"""
+        Geo.objects.filter(drugstore=instance).delete()
+        geo_serializer.save(city=city, drugstore=drugstore)
 
         instance_serializer = DrugstoreSerializer(instance)
 

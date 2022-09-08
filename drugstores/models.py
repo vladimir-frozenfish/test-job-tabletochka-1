@@ -51,13 +51,6 @@ class Drugstore(models.Model):
     phone = models.CharField(
         max_length=20, verbose_name='Телефон'
     )
-    '''
-    region = models.ForeignKey(
-        Region, on_delete=models.CASCADE,
-        related_name='drugstore', verbose_name='Регион аптеки',
-        blank=True, null=True
-    )
-    '''
 
     def schedule_representation(self):
         try:

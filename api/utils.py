@@ -25,7 +25,7 @@ def format_schedule(schedule):
         7: 'sunday'
     }
 
-    if len(schedule) != 7:
+    if schedule is None or len(schedule) != 7:
         raise serializers.ValidationError(
             {'message': 'В расписании должны быть указаны все дни недели'}
         )
