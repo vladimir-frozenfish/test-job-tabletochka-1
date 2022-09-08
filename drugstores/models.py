@@ -1,6 +1,22 @@
+import uuid
 from django.db import models
 
 from .utils import get_schedule_representation
+
+
+class Region(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(
+        max_length=100, verbose_name='Регион'
+    )
+
+    class Meta:
+        verbose_name_plural = 'Регионы'
+        verbose_name = 'Регион'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 class Drugstore(models.Model):
@@ -15,6 +31,11 @@ class Drugstore(models.Model):
     )
     phone = models.CharField(
         max_length=20, verbose_name='Телефон'
+    )
+    region = models.ForeignKey(
+        Region, on_delete=models.CASCADE,
+        related_name='drugstore', verbose_name='Регион аптеки',
+        blank=True, null=True
     )
 
     def schedule_representation(self):

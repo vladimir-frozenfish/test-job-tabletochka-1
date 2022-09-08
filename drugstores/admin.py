@@ -1,12 +1,16 @@
 from django.contrib import admin
 
-from .models import (Drugstore,
-                     Schedule)
+from .models import (
+    Drugstore,
+    Region,
+    Schedule
+)
 
 
 class DrugstoreAdmin(admin.ModelAdmin):
     list_display = (
         'drugstore_id',
+        'region',
         'created_at',
         'updated_at',
         'phone',
@@ -36,7 +40,17 @@ class ScheduleAdmin(admin.ModelAdmin):
     )
 
 
+class RegionAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name'
+    )
+    list_display_links = ('id', 'name')
+
+
 admin.site.register(Drugstore, DrugstoreAdmin)
 admin.site.register(Schedule, ScheduleAdmin)
+admin.site.register(Region, RegionAdmin)
+
 
 

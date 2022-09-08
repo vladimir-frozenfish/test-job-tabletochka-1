@@ -1,7 +1,10 @@
 from rest_framework import serializers
 
-from drugstores.models import (Drugstore,
-                               Schedule)
+from drugstores.models import (
+    Drugstore,
+    Region,
+    Schedule
+)
 from .utils import format_time, format_schedule
 
 
@@ -75,24 +78,43 @@ class ScheduleSerializer(serializers.ModelSerializer):
             },
         ]
 
-    def to_internal_value(self, data):
-        return data
+    # def to_internal_value(self, data):
+    #     return data
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    region_id = serializers.CharField(source='id')
+    region_name = serializers.CharField(source='name')
+
+    class Meta:
+        fields = (
+            'region_id',
+            'region_name'
+        )
+        model = Region
 
 
 class DrugstoreSerializer(serializers.ModelSerializer):
-    schedule = ScheduleSerializer(required=True)
+    schedule = ScheduleSerializer(required=False)
+    geo = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
             'created_at',
             'updated_at',
             'drugstore_id',
+            'geo',
             'phone',
             'schedule_representation',
             'schedule'
         )
         model = Drugstore
 
+    def get_geo(self, obj):
+        region = RegionSerializer(obj.region)
+        return region.data
+
+    '''
     def update(self, instance, data):
         """редактирование записи о аптеке"""
 
@@ -110,26 +132,41 @@ class DrugstoreSerializer(serializers.ModelSerializer):
         Schedule.objects.create(drugstore=drugstore, **data_schedule)
 
         return instance
+    '''
+
+
+class GeoSerializer(serializers.Field):
+    def to_representation(self, value):
+        return value
+
+    def to_internal_value(self, data):
+        return data
 
 
 class DrugstoreCreateSerializer(serializers.ModelSerializer):
     """сериализатор для создания записи об аптеке"""
-    schedule = ScheduleSerializer(required=True)
+    # schedule = ScheduleSerializer(required=True)
+    # geo = GeoSerializer(required=True)
 
     class Meta:
         fields = (
             'drugstore_id',
+            # 'geo',
             'phone',
-            'schedule'
+            # 'schedule'
         )
         model = Drugstore
 
+    '''
     def to_representation(self, instance):
         return {
             'drugstore_id': instance.drugstore_id
         }
+    '''
 
+    '''
     def create(self, data):
+        print(data)
         try:
             schedule = data.pop('schedule')
         except:
@@ -144,6 +181,4 @@ class DrugstoreCreateSerializer(serializers.ModelSerializer):
         Schedule.objects.create(drugstore=drugstore, **data_schedule)
 
         return drugstore
-
-
-
+    '''
